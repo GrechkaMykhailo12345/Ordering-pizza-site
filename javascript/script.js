@@ -46,11 +46,11 @@ class ShoppingCart {
         }
     }
 
-    addItem(product) {
-        if (this.items[pizza.id]) {
+    addItem(pizza) {
+        if (pizza.id in this.items) {
             this.items[pizza.id].quantity += 1
         } else {
-            this.items[pizza.id] = product
+            this.items[pizza.id] = pizza
             this.items[pizza.id].quantity = 1
         }
         this.saveCartToCookies()
@@ -67,6 +67,7 @@ function addToCard(event) {
     console.log(cart.items)
 }
 
+let pizza_list = document.querySelector('.pizza-list')
 getProducts().then(function (products) {
 
     if (pizza_list) {
@@ -102,12 +103,15 @@ let about_btn = document.querySelector('.about-btn')
 let about = document.querySelector('#about')
 let basket_btn = document.querySelector('.basket-btn')
 let basket = document.querySelector('#basket')
+let order_btn = document.querySelector('#order-btn')
+let order_screen = document.querySelector('#order-screen')
 
 function showScreen(current_screen){
     first_page.style.display = "none"
     all_products.style.display = "none"
     about.style.display = "none"
     basket.style.display = "none"
+    order_screen.style.display = "none"
 
     current_screen.style.display = 'block'
 }
@@ -129,16 +133,15 @@ first_page_btn.addEventListener("click", function (e) {
 
 basket_btn.addEventListener("click", function (e) {
     e.preventDefault()
+    showCart()
     showScreen(basket)
 })
 
-let pizza_list = document.querySelector('.pizza-list')
-
-getProducts().then(function (products) {
-    products.forEach(function (pizza) {
-        pizza_list.innerHTML += getCardHtml(pizza)
-    })
+order_btn?.addEventListener("click", function (e) {
+    e.preventDefault()
+    showScreen(order_screen)
 })
+
 
 function getCartItem(pizza) {
     return `
@@ -162,17 +165,20 @@ function getCartItem(pizza) {
 let cart_list = document.querySelector(".сart-list")
 let cart_buttons = document.querySelector(".cart-buttons")
 
-if (cart_list){
-    cart_list.innerHTML =''
-
-    for (let key in cart.items){
-        cart_list.innerHTML+= getCartItem(cart.items[key])
-    }
-
-    if (Object.keys(cart.items).length>0){
-        cart_buttons.classList.remove('d-none')
+function showCart(){
+    if (cart_list){
+        cart_list.innerHTML =''
+    
+        for (let key in cart.items){
+            cart_list.innerHTML+= getCartItem(cart.items[key])
+        }
+    
+        if (Object.keys(cart.items).length>0){
+            cart_buttons.classList.remove('d-none')
+        }
     }
 }
+
   
 let cart_clean_btn = document.querySelector(".cart-clean")
 
@@ -181,6 +187,8 @@ cart_clean_btn?.addEventListener("click", function(event){
     cart_list.innerHTML = 'У кошику немає товарів'
     cart_buttons.classList.add('d-none')
 })
+
+showCart()
 
 const swiper = new Swiper('.swiper', {
     // Optional parameters
@@ -207,3 +215,18 @@ const swiper = new Swiper('.swiper', {
       el: '.swiper-scrollbar',
     }, */
 });
+
+let order_form = document.querySelector('#order-form')
+
+const myModal = new bootstrap.Modal('#exampleModal', {
+    keyboard: false
+  })
+
+order_form?.addEventListener('submit', function(e){
+    e.preventDefault()
+    document.cookie = `cart=''; max-age=0; path=/`
+    cart_list.innerHTML = 'У кошику немає товарів'
+    cart_buttons.classList.add('d-none')
+    showScreen(all_products)
+    myModal.show()
+})
